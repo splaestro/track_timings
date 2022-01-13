@@ -1,11 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'time'
-
 module TrackTimings
 
     # YACRMT: Yet Another Class Representing Music Track info... 
-    # N.B. @duration is stored as a UTC time n number of seconds from the epoch
+    # N.B. @duration is stored as a Timing (UTC time n number of seconds from the epoch)
     # so that we can use Time#+ and #- to adjust durations and calculate 
     # cumulative time of multiple tracks. 
     # TODO: @num is variously an int or a zero-filled string; clean this up.
@@ -13,7 +11,8 @@ module TrackTimings
 
         FILE_EXTENSIONS = {"FLAC" => ".flac", "MP3" => ".mp3"}
 
-        attr_accessor :artist, :album, :title, :duration, :format
+        attr_reader :duration
+        attr_accessor :artist, :album, :title, :format
 
         def initialize(num, artist, album, title, duration, format="FLAC")
             @num = num.to_i
@@ -21,11 +20,13 @@ module TrackTimings
             @album = album
             @title = title
             @duration = duration
-            unless @duration.instance_of?(Time)
-                #TODO: fix this for durations > 60 minutes
-                @duration = Time.parse(sprintf("1970-01-01 00:0%s -0000", duration))
-            end
+            @duration = Timing.parse(duration) unless @duration.instance_of?(Timing)
             @format = format
+        end
+
+        def duration=(dur)
+            @duration = dur
+            @duration = Timing.parse(dur) unless dur.instance_of?(Timing)
         end
 
         def num=(numm)

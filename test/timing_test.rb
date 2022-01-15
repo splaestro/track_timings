@@ -5,7 +5,7 @@ class TimingTest < Minitest::Test
 
     def setup
         @tyming = TrackTimings::Timing.new(0, 5 ,0)
-        $stdout.puts name
+        #$stdout.puts name
     end
 
     def test_instance
@@ -37,6 +37,14 @@ class TimingTest < Minitest::Test
         assert_equal(22, parse_tyming3.sec)
         assert_equal(5302, parse_tyming3.total_seconds)
 
+        parse_tyming4 = TrackTimings::Timing.parse("01:28:22.839")
+        #refute_equal(parse_tyming3, parse_tyming4)
+        assert_equal(1, parse_tyming4.hour)
+        assert_equal(28, parse_tyming4.min)
+        assert_equal(22, parse_tyming4.sec)
+        assert_equal(839999, parse_tyming4.tv_usec)
+        assert_equal(5302, parse_tyming4.total_seconds)
+
         assert_raises(ArgumentError) {TrackTimings::Timing.parse("foo")}
         assert_raises(ArgumentError) {TrackTimings::Timing.parse("AA:BB.CCCC")}
         # note: leading zeroes are required!!
@@ -55,6 +63,36 @@ class TimingTest < Minitest::Test
         assert_equal(23, at_tyming.min)
         assert_equal(20, at_tyming.sec)
         assert_equal(5000, at_tyming.total_seconds)
+    end
+
+    def test_plus_simple
+        plussed = @tyming + 300
+        refute_equal(@tyming, plussed)
+        assert_instance_of(TrackTimings::Timing, plussed)
+
+        assert_equal(1970, plussed.year)
+        assert_equal(1, plussed.month)
+        assert_equal(1, plussed.day)
+        assert_equal(0, plussed.hour)
+        assert_equal(10,plussed.min)
+        assert_equal(0, plussed.sec)
+        assert_equal(600, plussed.total_seconds)
+      
+    end
+
+    def test_minus_simple
+        minused = @tyming - 60
+        refute_equal(@tyming, minused)
+        assert_instance_of(TrackTimings::Timing, minused)
+        
+        assert_equal(1970, minused.year)
+        assert_equal(1, minused.month)
+        assert_equal(1, minused.day)
+        assert_equal(0, minused.hour)
+        assert_equal(4, minused.min)
+        assert_equal(0,  minused.sec)
+        assert_equal(240, minused.total_seconds)
+
     end
 
 end

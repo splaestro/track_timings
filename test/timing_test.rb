@@ -20,6 +20,7 @@ class TimingTest < Minitest::Test
         assert_equal(0, @tyming.hour)
         assert_equal(5, @tyming.min)
         assert_equal(0, @tyming.sec)
+        assert_equal(0, @tyming.millisec)
         assert_equal(300, @tyming.total_seconds)
     end
     
@@ -35,15 +36,18 @@ class TimingTest < Minitest::Test
         assert_equal(1, parse_tyming3.hour)
         assert_equal(28, parse_tyming3.min)
         assert_equal(22, parse_tyming3.sec)
+        assert_equal(0, parse_tyming3.millisec)
         assert_equal(5302, parse_tyming3.total_seconds)
 
         parse_tyming4 = TrackTimings::Timing.parse("01:28:22.839")
-        #refute_equal(parse_tyming3, parse_tyming4)
+        # interestingly, when the below is true, "assert_equal(parse_tyming3, parse_tyming4)" is also true!
+        refute_equal(parse_tyming3.usec, parse_tyming4.usec)
         assert_equal(1, parse_tyming4.hour)
         assert_equal(28, parse_tyming4.min)
         assert_equal(22, parse_tyming4.sec)
-        assert_equal(839999, parse_tyming4.tv_usec)
-        assert_equal(5302, parse_tyming4.total_seconds)
+        assert_equal(839, parse_tyming4.millisec)
+        assert_equal(22.839, parse_tyming4.sec_with_frac)
+        assert_equal(5302.839, parse_tyming4.total_seconds)
 
         assert_raises(ArgumentError) {TrackTimings::Timing.parse("foo")}
         assert_raises(ArgumentError) {TrackTimings::Timing.parse("AA:BB.CCCC")}
@@ -53,6 +57,8 @@ class TimingTest < Minitest::Test
     
     def test_to_s
         assert_equal("00:05:00", @tyming.to_s)
+        #TODO: fix this!!!!
+        #refute_equal("839", TrackTimings::Timing.parse("01:28:22.839").strftime("%3L"))
     end
 
     def test_at

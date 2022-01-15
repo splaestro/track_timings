@@ -6,7 +6,7 @@ class TrackTest < Minitest::Test
     def setup
         @trak = TrackTimings::Track.new(1, "Brian Eno", "Another Green World", \
             "Sky Saw", "03:27")
-        $stdout.puts name
+        #$stdout.puts name
     end
 
     def test_instance

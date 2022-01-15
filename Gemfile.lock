@@ -10,6 +10,7 @@ GEM
     minitest-color (0.0.2)
       minitest (~> 5)
     rake (10.5.0)
+    redcarpet (3.5.1)
 
 PLATFORMS
   ruby
@@ -19,6 +20,7 @@ DEPENDENCIES
   minitest (~> 5.0)
   minitest-color (~> 0.0.2)
   rake (~> 10.0)
+  redcarpet (~> 3.5)
   track_timings!
 
 BUNDLED WITH

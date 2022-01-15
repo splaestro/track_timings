@@ -14,6 +14,7 @@ module TrackTimings
         attr_reader :total_seconds
 
         # both ::at and ::parse should call this function
+        # note that seconds can include a decimal portion
         def initialize(hours, minutes, seconds)
             @total_seconds = (hours * 3600) + (minutes * 60) + seconds
             super(1970, 1, 1, hours, minutes, seconds, "+00:00")
@@ -28,20 +29,49 @@ module TrackTimings
         end
 
         def Timing.parse(time_string)
-            #                   012         34        5      6 7 
-            parser = Regexp.new(/((\d{2}):)*((\d{2}):)(\d{2})(.(\d+))*/)
+            #                   012         34        56      7
+            parser = Regexp.new(/((\d{2}):)*((\d{2}):)((\d{2})(.(\d+))*)/)
             unless (parse_match = parser.match(time_string)) then
                 raise ArgumentError, "Timing.parse expects a time spec like 'hh:MM:SS.nnn'"
             end
-            hours, mins, secs = parse_match[2].to_i, parse_match[4].to_i, parse_match[5].to_i
-            # millisecs = parse_match[7].to_i
-            #TODO: also allow fractions of seconds--at present, any fractions are discarded
+            hours, mins, secs = parse_match[2].to_i, parse_match[4].to_i, parse_match[5].to_f.round(3)
+            #TODO: test fractional seconds more rigorously
             Timing.new(hours, mins, secs)
         end
-        
-        def to_s
-            self.strftime("%H:%M:%S")
+
+        # return milliseconds as a 3-digit integer
+        def millisec
+            short_usec * 1000
         end
+
+        # return seconds & milliseconds as a float
+        def sec_with_frac
+            short_usec + sec
+        end
+
+        def +(value)
+            Timing.at(@total_seconds + value)
+        end
+
+        # what should the behavior be if the passed-in value > @total_seconds?
+        def -(value)
+            Timing.at(@total_seconds - value)
+        end
+
+        def to_s
+            strftime("%H:%M:%S")
+        end
+
+        private
+
+        # return milliseconds as a float (microseconds rounded to 3 digits)
+        # this seems a bit tortured, but because of the larger precision of the
+        # fractional second, we won't get the original decimal value passed in
+        # (so compare `strftime "%3L`)
+        def short_usec
+            (to_f - tv_sec).round(3)
+        end
+
     end
 
 end
